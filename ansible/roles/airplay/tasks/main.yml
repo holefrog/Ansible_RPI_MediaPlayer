@@ -68,7 +68,6 @@
     state: started
     enabled: yes
     scope: user
-    daemon_reload: yes
   become: no
 
 - name: Initialize default PipeWire sink volume

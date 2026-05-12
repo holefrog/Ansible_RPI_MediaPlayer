@@ -82,7 +82,9 @@
     src: bluetooth-a2dp-autopair.service.j2
     dest: /etc/systemd/system/bluetooth-a2dp-autopair.service
     mode: '0644'
-  notify: restart autopair service
+  notify: 
+    - reload systemd daemon
+    - restart autopair service
 
 - name: Enable and start Bluetooth autopair system service
   become: yes
@@ -90,4 +92,3 @@
     name: bluetooth-a2dp-autopair.service
     state: started
     enabled: yes
-    daemon_reload: yes
