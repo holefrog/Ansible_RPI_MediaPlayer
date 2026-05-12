@@ -47,8 +47,8 @@
     dest: "{{ oled_app_dir }}/"
     mode: '0644'
   with_fileglob:
-    - "../../../../resources/oled/*.py"
-    - "../../../../resources/oled/*.ttf"
+    - "*.py"
+    - "*.ttf"
   become: no
 
 - name: Generate OLED hardware test script
@@ -96,7 +96,9 @@
     dest: "{{ ansible_env.HOME }}/.config/systemd/user/oled.service"
     mode: '0644'
   become: no
-  notify: restart oled service
+  notify: 
+    - reload systemd user daemon
+    - restart oled service
 
 - name: Enable and start OLED user service
   ansible.builtin.systemd:
@@ -104,5 +106,4 @@
     state: started
     enabled: yes
     scope: user
-    daemon_reload: yes
   become: no
