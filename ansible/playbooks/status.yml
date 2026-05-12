@@ -5,14 +5,14 @@
   tasks:
     - name: Check System Services Status
       become: yes
-      ansible.builtin.command: "systemctl is-active bluetooth bluetooth-a2dp-autopair volume"
+      ansible.builtin.command: "systemctl is-active bluetooth bluetooth-a2dp-autopair"
       register: system_status
       ignore_errors: yes
       changed_when: false
 
     - name: Check User Services Status
       become: no
-      ansible.builtin.command: "systemctl --user is-active pipewire wireplumber squeezelite shairport-sync oled"
+      ansible.builtin.command: "systemctl --user is-active pipewire wireplumber squeezelite shairport-sync oled volume"
       register: user_status
       ignore_errors: yes
       changed_when: false
@@ -21,8 +21,8 @@
       ansible.builtin.debug:
         msg: 
           - "===== SYSTEM SERVICES ====="
-          - "bluetooth, autopair, volume:"
+          - "bluetooth, autopair:"
           - "{{ system_status.stdout_lines }}"
           - "===== USER SERVICES ====="
-          - "pipewire, wireplumber, squeezelite, airplay, oled:"
+          - "pipewire, wireplumber, squeezelite, airplay, oled, volume:"
           - "{{ user_status.stdout_lines }}"

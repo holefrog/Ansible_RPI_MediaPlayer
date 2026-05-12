@@ -1,13 +1,15 @@
 ---
 # handlers file for volume
 
-- name: reload systemd daemon
-  become: yes
+- name: reload systemd user daemon
   ansible.builtin.systemd:
     daemon_reload: yes
+    scope: user
+  become: no
 
 - name: restart volume service
-  become: yes
   ansible.builtin.systemd:
     name: volume.service
     state: restarted
+    scope: user
+  become: no

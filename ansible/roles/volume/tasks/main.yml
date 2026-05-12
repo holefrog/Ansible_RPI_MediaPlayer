@@ -9,19 +9,41 @@
     mode: '0755'
   notify: restart volume service
 
-- name: Generate volume system service
+- name: Cleanup old mistaken system-level volume service
   become: yes
+  ansible.builtin.systemd:
+    name: volume.service
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: Remove old system-level volume service file
+  become: yes
+  ansible.builtin.file:
+    path: /etc/systemd/system/volume.service
+    state: absent
+
+- name: Ensure user systemd directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user"
+    state: directory
+    mode: '0755'
+  become: no
+
+- name: Generate volume user service
   ansible.builtin.template:
     src: volume.service.j2
-    dest: /etc/systemd/system/volume.service
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user/volume.service"
     mode: '0644'
+  become: no
   notify: 
-    - reload systemd daemon
+    - reload systemd user daemon
     - restart volume service
 
-- name: Enable and start volume system service
-  become: yes
+- name: Enable and start volume user service
   ansible.builtin.systemd:
     name: volume.service
     state: started
     enabled: yes
+    scope: user
+  become: no
