@@ -1,24 +1,15 @@
 ---
 # tasks file for pipewire
 
-- name: Install PipeWire and related packages
+- name: Install PipeWire and WirePlumber packages
   become: yes
   ansible.builtin.apt:
     name:
       - pipewire
-      - pipewire-pulse
       - wireplumber
-      - pipewire-audio-client-libraries
-      - pulseaudio-utils
+      - pipewire-pulse
+      - pipewire-alsa
     state: present
-    update_cache: yes
-
-- name: Ensure user systemd directory exists
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/systemd/user"
-    state: directory
-    mode: '0755'
-  become: no
 
 - name: Enable and start PipeWire user services
   ansible.builtin.systemd:
@@ -26,9 +17,8 @@
     state: started
     enabled: yes
     scope: user
-    daemon_reload: yes
-  become: no
-  with_items:
+  loop:
     - pipewire.service
-    - pipewire-pulse.service
     - wireplumber.service
+    - pipewire-pulse.service
+  become: no

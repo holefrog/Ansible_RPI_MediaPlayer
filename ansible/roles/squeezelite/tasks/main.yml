@@ -37,7 +37,9 @@
     dest: "{{ ansible_env.HOME }}/.config/systemd/user/squeezelite.service"
     mode: '0644'
   become: no
-  notify: restart squeezelite service
+  notify: 
+    - reload systemd user daemon
+    - restart squeezelite service
 
 - name: Enable and start Squeezelite user service
   ansible.builtin.systemd:
@@ -45,5 +47,4 @@
     state: started
     enabled: yes
     scope: user
-    daemon_reload: yes
   become: no

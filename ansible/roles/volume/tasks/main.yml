@@ -5,29 +5,23 @@
   become: yes
   ansible.builtin.template:
     src: volume.sh.j2
-    dest: "{{ SYSTEM_BIN_DIR }}/volume.sh"
+    dest: "/usr/local/bin/volume.sh"
     mode: '0755'
-
-- name: Ensure user systemd directory exists
-  ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/systemd/user"
-    state: directory
-    mode: '0755'
-  become: no
-
-- name: Generate systemd user service for volume
-  ansible.builtin.template:
-    src: volume.service.j2
-    dest: "{{ ansible_env.HOME }}/.config/systemd/user/volume.service"
-    mode: '0644'
-  become: no
   notify: restart volume service
 
-- name: Enable and start volume user service
+- name: Generate volume system service
+  become: yes
+  ansible.builtin.template:
+    src: volume.service.j2
+    dest: /etc/systemd/system/volume.service
+    mode: '0644'
+  notify: 
+    - reload systemd daemon
+    - restart volume service
+
+- name: Enable and start volume system service
+  become: yes
   ansible.builtin.systemd:
     name: volume.service
     state: started
     enabled: yes
-    scope: user
-    daemon_reload: yes
-  become: no

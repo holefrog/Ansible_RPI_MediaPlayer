@@ -70,3 +70,11 @@
     scope: user
     daemon_reload: yes
   become: no
+
+- name: Initialize default PipeWire sink volume
+  ansible.builtin.command: "pactl set-sink-volume @DEFAULT_SINK@ {{ airplay_default_sink_volume | default('100') }}%"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ ansible_user_uid }}"
+  become: no
+  changed_when: true
+  ignore_errors: yes
