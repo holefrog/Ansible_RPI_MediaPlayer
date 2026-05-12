@@ -1,0 +1,10 @@
+---
+BT_NAME: "RPI-Bluetooth"
+CHECK_INTERVAL: "20"
+BT_INIT_DELAY: "2"
+BT_RFKILL_DELAY: "2"
+PINS_FILE: "{{ ansible_env.HOME }}/.config/bluetooth-a2dp/pins.txt"
+SYSTEM_BIN_DIR: "/usr/local/bin"
+USER_NAME: "{{ ansible_user_id }}"
+USER_ID: "{{ ansible_user_uid }}"
+USER_RUNTIME_DIR: "/run/user/{{ ansible_user_uid }}"

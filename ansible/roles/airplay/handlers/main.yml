@@ -1,0 +1,10 @@
+---
+# handlers file for airplay
+
+- name: restart airplay service
+  ansible.builtin.systemd:
+    name: shairport-sync.service
+    state: restarted
+    scope: user
+    daemon_reload: yes
+  become: no

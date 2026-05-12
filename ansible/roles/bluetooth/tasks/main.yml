@@ -1,0 +1,97 @@
+---
+# tasks file for bluetooth
+
+- name: Install Bluetooth packages
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - bluez
+      - bluez-tools
+      - libspa-0.2-bluetooth
+    state: present
+
+- name: Backup existing bluetooth main.conf
+  become: yes
+  ansible.builtin.copy:
+    src: /etc/bluetooth/main.conf
+    dest: /etc/bluetooth/main.conf.bak
+    remote_src: yes
+    force: no
+  ignore_errors: yes
+
+- name: Update system bluetooth configuration
+  become: yes
+  ansible.builtin.template:
+    src: bluetooth-main.conf.j2
+    dest: /etc/bluetooth/main.conf
+    mode: '0644'
+  notify: restart bluetooth service
+
+- name: Ensure WirePlumber config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/wireplumber/wireplumber.conf.d"
+    state: directory
+    mode: '0755'
+  become: no
+
+- name: Update WirePlumber bluetooth routing configuration
+  ansible.builtin.template:
+    src: wireplumber-bluetooth.conf.j2
+    dest: "{{ ansible_env.HOME }}/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf"
+    mode: '0644'
+  become: no
+  notify: restart user pipewire services
+
+- name: Unblock bluetooth via rfkill
+  become: yes
+  ansible.builtin.command: rfkill unblock bluetooth
+  changed_when: true
+
+- name: Wait for rfkill unblock
+  ansible.builtin.pause:
+    seconds: "{{ BT_RFKILL_DELAY }}"
+
+- name: Enable and start system bluetooth service
+  become: yes
+  ansible.builtin.systemd:
+    name: bluetooth.service
+    state: started
+    enabled: yes
+
+- name: Ensure Bluetooth A2DP config directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/bluetooth-a2dp"
+    state: directory
+    mode: '0755'
+  become: no
+
+- name: Create PINs configuration file
+  ansible.builtin.copy:
+    content: "* *"
+    dest: "{{ PINS_FILE }}"
+    mode: '0600'
+  become: no
+
+- name: Install Bluetooth autopair script
+  become: yes
+  ansible.builtin.template:
+    src: bluetooth-a2dp-autopair.sh.j2
+    dest: "{{ SYSTEM_BIN_DIR }}/bluetooth-a2dp-autopair.sh"
+    mode: '0755'
+  notify: restart autopair service
+
+- name: Install Bluetooth autopair system service
+  become: yes
+  ansible.builtin.template:
+    src: bluetooth-a2dp-autopair.service.j2
+    dest: /etc/systemd/system/bluetooth-a2dp-autopair.service
+    mode: '0644'
+  notify: restart autopair service
+
+- name: Enable and start Bluetooth autopair system service
+  become: yes
+  ansible.builtin.systemd:
+    name: bluetooth-a2dp-autopair.service
+    state: started
+    enabled: yes
+    daemon_reload: yes

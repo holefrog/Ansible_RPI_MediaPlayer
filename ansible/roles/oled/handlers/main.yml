@@ -1,0 +1,9 @@
+---
+# handlers file for oled
+- name: restart oled service
+  ansible.builtin.systemd:
+    name: oled.service
+    state: restarted
+    scope: user
+    daemon_reload: yes
+  become: no

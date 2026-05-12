@@ -1,0 +1,108 @@
+---
+# tasks file for oled
+
+- name: Install system dependencies for OLED
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-smbus
+      - python3-pillow
+    state: present
+    update_cache: yes
+
+- name: Check if I2C device exists
+  ansible.builtin.stat:
+    path: "/dev/i2c-{{ oled_bus }}"
+  register: i2c_dev
+
+- name: Warn if I2C device does not exist
+  ansible.builtin.debug:
+    msg: "WARNING: I2C device /dev/i2c-{{ oled_bus }} does not exist. Tests will be skipped, and service may fail."
+  when: not i2c_dev.stat.exists
+
+- name: Ensure Python virtual environment exists and dependencies are installed
+  ansible.builtin.pip:
+    name:
+      - pip
+      - luma.oled
+      - requests
+    virtualenv: "{{ oled_venv_dir }}"
+    virtualenv_command: "python3 -m venv"
+    state: latest
+  become: no
+
+- name: Create OLED app directory
+  ansible.builtin.file:
+    path: "{{ oled_app_dir }}"
+    state: directory
+    mode: '0755'
+  become: no
+
+- name: Copy OLED application files (Python & Fonts)
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "{{ oled_app_dir }}/"
+    mode: '0644'
+  with_fileglob:
+    - "../../../../resources/oled/*.py"
+    - "../../../../resources/oled/*.ttf"
+  become: no
+
+- name: Generate OLED hardware test script
+  ansible.builtin.template:
+    src: oled_test.py.j2
+    dest: "/usr/local/bin/oled_display.py"
+    mode: '0755'
+  become: yes
+
+- name: Run OLED hardware test
+  ansible.builtin.command: "{{ oled_venv_dir }}/bin/python /usr/local/bin/oled_display.py"
+  become: no
+  async: "{{ oled_test_timeout }}"
+  poll: 0
+  register: oled_test_job
+  when: i2c_dev.stat.exists
+
+- name: Wait for OLED hardware test to finish
+  ansible.builtin.async_status:
+    jid: "{{ oled_test_job.ansible_job_id }}"
+  register: job_result
+  until: job_result.finished
+  retries: "{{ oled_test_timeout }}"
+  delay: 1
+  when: i2c_dev.stat.exists and oled_test_job is defined and oled_test_job.ansible_job_id is defined
+
+- name: Generate oled.ini configuration
+  ansible.builtin.template:
+    src: oled.ini.j2
+    dest: "{{ oled_app_dir }}/oled.ini"
+    mode: '0644'
+  become: no
+  notify: restart oled service
+
+- name: Ensure user systemd directory exists
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/systemd/user"
+    state: directory
+    mode: '0755'
+  become: no
+
+- name: Generate systemd user service for OLED
+  ansible.builtin.template:
+    src: oled.service.j2
+    dest: "{{ ansible_env.HOME }}/.config/systemd/user/oled.service"
+    mode: '0644'
+  become: no
+  notify: restart oled service
+
+- name: Enable and start OLED user service
+  ansible.builtin.systemd:
+    name: oled.service
+    state: started
+    enabled: yes
+    scope: user
+    daemon_reload: yes
+  become: no

@@ -1,0 +1,9 @@
+---
+PLAYER_NAME: "RPI-Squeeze"
+SERVER_IP: "192.168.50.210"
+ALSA_DEVICE: "default"
+EXTRA_ARGS: "-a 40:4:32:0 -b 500:5000"
+PIPEWIRE_TIMEOUT: "30"
+SYSTEM_BIN_DIR: "/usr/local/bin"
+# Generate a pseudo-random MAC address based on inventory_hostname for idempotency
+PLAYER_MAC: "02:{{ '%02x:%02x:%02x:%02x:%02x' | format(255 | random(seed=inventory_hostname), 255 | random(seed=inventory_hostname + '1'), 255 | random(seed=inventory_hostname + '2'), 255 | random(seed=inventory_hostname + '3'), 255 | random(seed=inventory_hostname + '4')) }}"

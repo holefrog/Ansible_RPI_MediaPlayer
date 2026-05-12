@@ -1,0 +1,23 @@
+---
+# defaults file for oled
+oled_width: 128
+oled_height: 64
+oled_bus: 3
+oled_address: "0x3C"
+oled_log_level: "INFO"
+
+# Default paths
+oled_app_base_dir: "{{ ansible_env.HOME }}/rpi-mediaplayer"
+oled_app_dir: "{{ oled_app_base_dir }}/oled"
+oled_venv_dir: "{{ ansible_env.HOME }}/.venv/oled"
+metadata_pipe: "/tmp/shairport-sync-metadata"
+
+# Default LMS Server info
+lms_server_ip: "192.168.50.210"
+lms_server_port: "9000"
+
+# Hardware test
+oled_test_timeout: 25
+
+# User runtime path for systemd service template
+user_runtime_dir: "/run/user/{{ ansible_user_uid | default(1000) }}"

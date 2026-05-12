@@ -1,0 +1,89 @@
+---
+# tasks file for system
+
+- name: Set timezone
+  become: yes
+  ansible.builtin.timezone:
+    name: "{{ timezone }}"
+
+- name: Ensure locale en_GB.UTF-8 is generated
+  become: yes
+  ansible.builtin.locale_gen:
+    name: en_GB.UTF-8
+    state: present
+
+- name: Update locale configuration
+  become: yes
+  ansible.builtin.command: update-locale LANG=en_GB.UTF-8 LANGUAGE=en_GB:en LC_ALL=en_GB.UTF-8
+  changed_when: false
+
+- name: Add alias to .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: "alias ll='ls -l'"
+    state: present
+    create: yes
+  become: no
+
+- name: Update system packages
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: yes
+  when: auto_update == 'yes'
+
+- name: Enable systemd linger for user
+  become: yes
+  ansible.builtin.command: loginctl enable-linger {{ ansible_user_id }}
+  register: loginctl_output
+  changed_when: false
+
+- name: Install hardware dependencies
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - i2c-tools
+      - alsa-utils
+      - libasound2t64
+      - dbus-user-session
+    state: present
+
+- name: Enable i2c_dev kernel module
+  become: yes
+  community.general.modprobe:
+    name: i2c_dev
+    state: present
+  ignore_errors: yes # Might fail in some environments without hardware
+
+- name: Ensure i2c_dev in /etc/modules
+  become: yes
+  ansible.builtin.lineinfile:
+    path: /etc/modules
+    line: "i2c_dev"
+    state: present
+
+- name: Configure hardware in boot config (I2C)
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "{{ boot_config_file }}"
+    line: "dtparam=i2c_arm=on"
+    state: present
+
+- name: Configure WM8960 audio driver in boot config
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "{{ boot_config_file }}"
+    line: "{{ item }}"
+    state: present
+  with_items:
+    - "dtparam=i2s=on"
+    - "dtparam=audio=off"
+    - "dtoverlay=wm8960-soundcard"
+    - "dtoverlay=i2s-mmap"
+
+- name: Configure OLED GPIO in boot config
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "{{ boot_config_file }}"
+    line: "dtoverlay=i2c-gpio,bus={{ oled_bus }},i2c_gpio_sda={{ oled_sda_pin }},i2c_gpio_scl={{ oled_scl_pin }}"
+    state: present
