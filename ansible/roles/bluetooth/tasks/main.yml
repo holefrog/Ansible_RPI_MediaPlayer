@@ -29,7 +29,7 @@
 
 - name: Ensure WirePlumber config directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/wireplumber/wireplumber.conf.d"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/wireplumber/wireplumber.conf.d"
     state: directory
     mode: '0755'
   become: no
@@ -37,7 +37,7 @@
 - name: Update WirePlumber bluetooth routing configuration
   ansible.builtin.template:
     src: wireplumber-bluetooth.conf.j2
-    dest: "{{ ansible_env.HOME }}/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf"
     mode: '0644'
   become: no
   notify: restart user pipewire services
@@ -56,7 +56,7 @@
 
 - name: Ensure Bluetooth A2DP config directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/bluetooth-a2dp"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/bluetooth-a2dp"
     state: directory
     mode: '0755'
   become: no

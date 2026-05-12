@@ -11,7 +11,7 @@
   become: yes
   ansible.builtin.copy:
     dest: /etc/tmpfiles.d/shairport-sync-metadata.conf
-    content: "p {{ METADATA_PIPE }} 0664 {{ ansible_user_id }} {{ ansible_user_id }} -"
+    content: "p {{ METADATA_PIPE }} 0664 {{ ansible_facts['user_id'] }} {{ ansible_facts['user_id'] }} -"
     mode: '0644'
 
 - name: Ensure metadata pipe is created now via tmpfiles
@@ -45,7 +45,7 @@
 
 - name: Ensure user systemd directory exists
   ansible.builtin.file:
-    path: "{{ ansible_env.HOME }}/.config/systemd/user"
+    path: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user"
     state: directory
     mode: '0755'
   become: no
@@ -53,7 +53,7 @@
 - name: Generate systemd user service for Shairport-Sync
   ansible.builtin.template:
     src: shairport-sync.service.j2
-    dest: "{{ ansible_env.HOME }}/.config/systemd/user/shairport-sync.service"
+    dest: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user/shairport-sync.service"
     mode: '0644'
   become: no
   notify: 
@@ -71,7 +71,7 @@
 - name: Initialize default PipeWire sink volume
   ansible.builtin.command: "pactl set-sink-volume @DEFAULT_SINK@ {{ airplay_default_sink_volume | default('100') }}%"
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ ansible_user_uid }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ ansible_facts['user_uid'] }}"
   become: no
   changed_when: true
   ignore_errors: yes
