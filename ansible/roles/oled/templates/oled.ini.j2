@@ -4,7 +4,7 @@
 [SERVER]
 HOST_IP = {{ lms_server_ip }}
 HOST_Port = {{ lms_server_port }}
-PLAYER_ID = {{ player_id | default(ansible_default_ipv4.macaddress | default('00:00:00:00:00:00')) }}
+PLAYER_ID = {{ player_mac }}
 
 [OLED]
 # 硬件配置
