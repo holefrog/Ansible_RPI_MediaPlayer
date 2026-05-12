@@ -1,23 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
+
 cd "$(dirname "$0")"
 
-# 引用公共库
-source lib/local_utils.sh
+# 颜色定义
+GREEN='\033[0;32m'
+NC='\033[0m'
 
-# 1. 初始化连接
-init_connection
+echo -e "${GREEN}>>> 正在通过 Ansible 获取所有服务状态...${NC}"
 
-# 2. 准备服务列表
-SYS_SVCS="$CORE_SYS_SERVICES"
-USER_SVCS="$CORE_USER_SERVICES"
+# 进入 ansible 目录以使用正确的配置 (ansible.cfg, inventory)
+cd ansible
 
-echo -e "${GREEN}>>> 正在连接 $HOST (用户: $USER | 端口: $PORT)...${NC}"
+# 执行状态检查 playbook
+ansible-playbook playbooks/status.yml
 
-# 3. 远程执行
-# 【关键修复】我们需要手动构造远程命令字符串，并对引号进行转义
-# 这样 SSH 发送给远程的命令类似于： bash -s -- "svc1 svc2" "svc3 svc4"
-# 从而确保 $1 和 $2 能接收到完整的列表字符串
-REMOTE_CMD="bash -s -- \"$SYS_SVCS\" \"$USER_SVCS\""
-
-$SSH_CMD $SSH_OPTS "$REMOTE" "$REMOTE_CMD" < lib/monitor.sh
+echo -e "${GREEN}>>> 状态检查完毕。${NC}"

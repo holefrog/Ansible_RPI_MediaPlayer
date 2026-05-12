@@ -1,0 +1,49 @@
+---
+- name: Check Media Player Services Status
+  hosts: all
+  gather_facts: no
+  vars:
+    system_services:
+      - bluetooth
+      - bluetooth-a2dp-autopair
+    user_services:
+      - oled
+      - pipewire
+      - shairport-sync
+      - squeezelite
+      - volume
+      - wireplumber
+
+  tasks:
+    - name: Get status of System Services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+      register: sys_status
+      loop: "{{ system_services }}"
+      become: yes
+      ignore_errors: yes
+
+    - name: Get status of User Services
+      ansible.builtin.systemd:
+        name: "{{ item }}"
+        scope: user
+      register: user_status
+      loop: "{{ user_services }}"
+      become: no
+      ignore_errors: yes
+
+    - name: Display System Services Status
+      ansible.builtin.debug:
+        msg: >-
+          {{ item.item }}: {{ item.status.ActiveState | default('not-found') }} ({{ item.status.SubState | default('N/A') }})
+      loop: "{{ sys_status.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Display User Services Status
+      ansible.builtin.debug:
+        msg: >-
+          {{ item.item }}: {{ item.status.ActiveState | default('not-found') }} ({{ item.status.SubState | default('N/A') }})
+      loop: "{{ user_status.results }}"
+      loop_control:
+        label: "{{ item.item }}"
