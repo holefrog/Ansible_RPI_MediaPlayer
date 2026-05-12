@@ -1,0 +1,17 @@
+---
+- name: Update system packages
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: yes
+  when: auto_update == 'yes'
+
+- name: Install hardware dependencies
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - i2c-tools
+      - alsa-utils
+      - libasound2t64
+      - dbus-user-session
+    state: present

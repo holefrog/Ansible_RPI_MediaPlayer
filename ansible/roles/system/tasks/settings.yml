@@ -1,0 +1,30 @@
+---
+- name: Set timezone
+  become: yes
+  ansible.builtin.timezone:
+    name: "{{ timezone }}"
+
+- name: Ensure locale en_GB.UTF-8 is generated
+  become: yes
+  ansible.builtin.locale_gen:
+    name: en_GB.UTF-8
+    state: present
+
+- name: Update locale configuration
+  become: yes
+  ansible.builtin.command: update-locale LANG=en_GB.UTF-8 LANGUAGE=en_GB:en LC_ALL=en_GB.UTF-8
+  changed_when: false
+
+- name: Add alias to .bashrc
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.bashrc"
+    line: "alias ll='ls -l'"
+    state: present
+    create: yes
+  become: no
+
+- name: Enable systemd linger for user
+  become: yes
+  ansible.builtin.command: loginctl enable-linger {{ ansible_user_id }}
+  register: loginctl_output
+  changed_when: false
