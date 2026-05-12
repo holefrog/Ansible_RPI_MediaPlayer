@@ -7,19 +7,17 @@
     name: shairport-sync
     state: present
 
-- name: Create metadata pipe
+- name: Configure systemd-tmpfiles for metadata pipe (survives reboot)
   become: yes
-  ansible.builtin.command: "mkfifo {{ METADATA_PIPE }}"
-  args:
-    creates: "{{ METADATA_PIPE }}"
+  ansible.builtin.copy:
+    dest: /etc/tmpfiles.d/shairport-sync-metadata.conf
+    content: "p {{ METADATA_PIPE }} 0664 {{ ansible_user_id }} {{ ansible_user_id }} -"
+    mode: '0644'
 
-- name: Ensure correct permissions on metadata pipe
+- name: Ensure metadata pipe is created now via tmpfiles
   become: yes
-  ansible.builtin.file:
-    path: "{{ METADATA_PIPE }}"
-    owner: "{{ ansible_user_id }}"
-    group: "{{ ansible_user_id }}"
-    mode: '0664'
+  ansible.builtin.command: systemd-tmpfiles --create /etc/tmpfiles.d/shairport-sync-metadata.conf
+  changed_when: false
 
 - name: Ensure Shairport-Sync config directory exists
   become: yes

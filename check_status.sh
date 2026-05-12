@@ -13,6 +13,6 @@ echo -e "${GREEN}>>> 正在通过 Ansible 获取所有服务状态...${NC}"
 cd ansible
 
 # 执行状态检查 playbook
-ansible-playbook playbooks/status.yml
+ansible-playbook playbooks/status.yml "$@"
 
 echo -e "${GREEN}>>> 状态检查完毕。${NC}"
