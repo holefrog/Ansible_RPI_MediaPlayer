@@ -58,7 +58,9 @@
     dest: "{{ ansible_env.HOME }}/.config/systemd/user/shairport-sync.service"
     mode: '0644'
   become: no
-  notify: restart airplay service
+  notify: 
+    - reload systemd user daemon
+    - restart airplay service
 
 - name: Enable and start Shairport-Sync user service
   ansible.builtin.systemd:

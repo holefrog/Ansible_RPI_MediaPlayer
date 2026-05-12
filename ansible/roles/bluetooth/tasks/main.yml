@@ -47,10 +47,6 @@
   ansible.builtin.command: rfkill unblock bluetooth
   changed_when: true
 
-- name: Wait for rfkill unblock
-  ansible.builtin.pause:
-    seconds: "{{ BT_RFKILL_DELAY }}"
-
 - name: Enable and start system bluetooth service
   become: yes
   ansible.builtin.systemd:
