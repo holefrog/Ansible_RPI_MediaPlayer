@@ -71,7 +71,7 @@
 - name: Initialize default PipeWire sink volume
   ansible.builtin.command: "pactl set-sink-volume @DEFAULT_SINK@ {{ airplay_default_sink_volume | default('100') }}%"
   environment:
-    XDG_RUNTIME_DIR: "/run/user/{{ mediaplayer_uid }}"
+    XDG_RUNTIME_DIR: "{{ mediaplayer_runtime_dir }}"
   become: no
   changed_when: true
   ignore_errors: yes
