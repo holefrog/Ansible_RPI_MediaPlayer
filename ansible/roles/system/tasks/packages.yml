@@ -8,8 +8,6 @@
       - libasound2t64  # Or libasound2 based on OS version
       - alsa-utils
       - pulseaudio-utils
-      - libspa-0.2-bluetooth
-      - pipewire-audio
     state: present
     update_cache: yes
 
