@@ -7,6 +7,8 @@
       - alsa-utils
       - libasound2t64  # Or libasound2 based on OS version
       - unattended-upgrades
+      # 如果还有其他所有音频组件都需要的底层包，比如 pipewire, alsa-utils，也可以放在这里
+      - pulseaudio-utils
     state: present
     update_cache: yes
 

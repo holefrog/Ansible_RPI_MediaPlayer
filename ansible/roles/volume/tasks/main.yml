@@ -1,12 +1,6 @@
 ---
 # tasks file for volume
 
-- name: Install dependencies for volume control
-  become: yes
-  ansible.builtin.apt:
-    name: pulseaudio-utils
-    state: present
-
 - name: Install volume control script
   become: yes
   ansible.builtin.template:

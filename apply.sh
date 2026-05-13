@@ -15,11 +15,11 @@ read -rp "请选择 [1/2，其他退出]: " choice
 case "$choice" in
     1)
         MODE="Deploy"
-        PB="site.yml"
+        PB="ansible/site.yml"
         ;;
     2)
         MODE="Status"
-        PB="playbooks/status.yml"
+        PB="ansible/status.yml"
         ;;
     *)
         echo "已退出。"
