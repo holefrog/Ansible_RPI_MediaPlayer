@@ -9,6 +9,8 @@ Wants=pipewire.service user@{{ USER_ID }}.service
 Type=simple
 User=root
 Environment="USER_RUNTIME_DIR={{ USER_RUNTIME_DIR }}"
+# 在执行主脚本前，先由 Systemd 阻塞等待 PipeWire 就绪
+ExecStartPre=/bin/bash -c "while ! sudo -u {{ USER_NAME }} XDG_RUNTIME_DIR={{ USER_RUNTIME_DIR }} pactl info >/dev/null 2>&1; do sleep 2; done"
 ExecStart={{ SYSTEM_BIN_DIR }}/bluetooth-a2dp-autopair.sh
 Restart=always
 RestartSec=10
