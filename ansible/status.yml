@@ -13,6 +13,8 @@
     - name: Check User Services Status
       become: no
       ansible.builtin.command: "systemctl --user is-active pipewire wireplumber squeezelite shairport-sync oled volume"
+      environment:
+        XDG_RUNTIME_DIR: "{{ mediaplayer_runtime_dir | default('/run/user/1000') }}"
       register: user_status
       ignore_errors: yes
       changed_when: false
