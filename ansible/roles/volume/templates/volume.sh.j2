@@ -11,8 +11,8 @@ RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 export XDG_RUNTIME_DIR="$RUNTIME_DIR"
 
 # 从模板变量读取音量配置
-readonly DEFAULT_HW_VOLUME="{{DEFAULT_HW_VOLUME}}%"
-readonly DEFAULT_SINK_VOLUME="{{DEFAULT_SINK_VOLUME}}%"
+readonly DEFAULT_HW_VOLUME="{{ DEFAULT_HW_VOLUME }}%"
+readonly DEFAULT_SINK_VOLUME="{{ DEFAULT_SINK_VOLUME }}%"
 
 # ============================================
 # 统一日志函数

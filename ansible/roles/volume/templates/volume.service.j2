@@ -6,7 +6,7 @@ Wants=pipewire.service pipewire-pulse.service wireplumber.service
 
 [Service]
 Type=oneshot
-Environment="XDG_RUNTIME_DIR={{USER_RUNTIME_DIR}}"
+Environment="XDG_RUNTIME_DIR={{ USER_RUNTIME_DIR }}"
 
 # [基础设施层] 等待 PipeWire 就绪（最多 30 秒）
 # 职责：确保音频守护进程已启动，这是运行 volume.sh 的前提条件
@@ -23,7 +23,7 @@ exit 1'
 
 # [业务逻辑层] 初始化 WM8960 音量配置
 # 具体的硬件等待逻辑在脚本内部处理
-ExecStart={{SYSTEM_BIN_DIR}}/volume.sh init
+ExecStart={{ SYSTEM_BIN_DIR }}/volume.sh init
 
 # 服务保持活动状态（不会在启动后退出）
 RemainAfterExit=yes

@@ -14,5 +14,5 @@
     reboot_timeout: 300
   when: >
     (i2c_boot_config is defined and i2c_boot_config.changed) or
-    (wm8960_boot_config is defined and wm8960_boot_config.changed) or
+    (wm8960_boot_config is defined and wm8960_boot_config.results | default([]) | selectattr('changed') | list | length > 0) or
     (oled_boot_config is defined and oled_boot_config.changed)

@@ -3,10 +3,10 @@
 
 general = {
     // AirPlay 服务名称
-    name = "{{AIRPLAY_NAME}}";
+    name = "{{ AIRPLAY_NAME }}";
     
     // 监听端口
-    port = {{AIRPLAY_PORT}};
+    port = {{ AIRPLAY_PORT }};
     
     // 音频插值算法（soxr 提供最佳质量）
     interpolation = "soxr";
@@ -17,7 +17,7 @@ general = {
 
 alsa = {
     // ALSA 输出设备
-    output_device = "{{ALSA_DEVICE}}";
+    output_device = "{{ ALSA_DEVICE }}";
     
     // 不使用 ALSA 混音器（通过 PipeWire 控制音量）
     mixer_control_name = "None";
@@ -31,7 +31,7 @@ metadata = {
     include_cover_art = "yes";
     
     // 元数据管道路径
-    pipe_name = "{{METADATA_PIPE}}";
+    pipe_name = "{{ METADATA_PIPE }}";
     
     // 管道超时（毫秒）
     pipe_timeout = 5000;
@@ -39,7 +39,7 @@ metadata = {
 
 volume = {
     // 初始音量（0-100）
-    initial_volume = {{INITIAL_VOLUME}};
+    initial_volume = {{ INITIAL_VOLUME }};
     
     // 音量范围（dB）
     range_db = 30;
