@@ -54,7 +54,7 @@
 JustWorksRepairing = always
 AlwaysPairable = true
 DiscoverableTimeout = 0
-Class = 0x240414
+Class = 0x240418
 ControllerMode = bredr
 ```
 
