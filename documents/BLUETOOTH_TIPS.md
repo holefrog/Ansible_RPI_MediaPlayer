@@ -55,6 +55,7 @@ JustWorksRepairing = always
 AlwaysPairable = true
 DiscoverableTimeout = 0
 Class = 0x240414
+ControllerMode = bredr
 ```
 
 ### 4.2 清理物理缓存

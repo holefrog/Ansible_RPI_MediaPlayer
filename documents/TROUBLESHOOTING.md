@@ -1183,7 +1183,7 @@ cat /etc/bluetooth/main.conf | grep -i volume
 [General]
 # 确保包含这些配置
 Class = 0x240414
-ControllerMode = dual
+ControllerMode = bredr
 ```
 
 </details>
