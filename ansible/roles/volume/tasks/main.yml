@@ -9,13 +9,18 @@
     mode: '0755'
   notify: restart volume service
 
+- name: Check if old system-level volume service exists
+  ansible.builtin.stat:
+    path: /etc/systemd/system/volume.service
+  register: old_volume_service
+
 - name: Cleanup old mistaken system-level volume service
   become: yes
   ansible.builtin.systemd:
     name: volume.service
     state: stopped
     enabled: no
-  ignore_errors: yes
+  when: old_volume_service.stat.exists
 
 - name: Remove old system-level volume service file
   become: yes
