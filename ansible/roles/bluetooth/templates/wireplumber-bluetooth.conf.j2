@@ -6,9 +6,9 @@ monitor.bluez.properties = {
   bluez5.roles = [ a2dp_sink, a2dp_source ]
   bluez5.hfphsp-roles = [ ]
   
-  # 支持的编解码器
-  bluez5.codecs = [ sbc sbc_xq aac ldac aptx aptx_hd aptx_ll faststream ]
-  bluez5.enable-sbc-xq = true
+  # 支持的编解码器 (关闭 sbc_xq，部分安卓设备对该非标准格式兼容性极差，会导致无声)
+  bluez5.codecs = [ sbc aac ]
+  bluez5.enable-sbc-xq = false
   bluez5.enable-msbc = false
 }
 
