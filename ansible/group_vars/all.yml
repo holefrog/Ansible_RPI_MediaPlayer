@@ -1,6 +1,6 @@
 ---
-# Generate a pseudo-random MAC address based on inventory_hostname for idempotency across all roles
-player_mac: "02:{{ '%02x:%02x:%02x:%02x:%02x' | format(255 | random(seed=inventory_hostname), 255 | random(seed=inventory_hostname + '1'), 255 | random(seed=inventory_hostname + '2'), 255 | random(seed=inventory_hostname + '3'), 255 | random(seed=inventory_hostname + '4')) }}"
+# Use the physical hardware MAC address of the default network interface to prevent HA duplication
+player_mac: "{{ ansible_default_ipv4.macaddress }}"
 
 # Global LMS Server configuration
 lms_server_ip: "192.168.50.210"
