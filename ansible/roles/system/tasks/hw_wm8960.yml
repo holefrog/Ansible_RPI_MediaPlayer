@@ -1,3 +1,4 @@
+---
 - name: Configure WM8960 audio driver in boot config
   become: yes
   ansible.builtin.lineinfile:
