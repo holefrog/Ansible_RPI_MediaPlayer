@@ -4,11 +4,12 @@ monitor.bluez.properties = {
   
   # 蓝牙角色配置
   bluez5.roles = [ a2dp_sink ]
+  bluez5.hfphsp-roles = [ ]
   
   # 支持的编解码器
   bluez5.codecs = [ sbc sbc_xq aac ldac aptx aptx_hd aptx_ll faststream ]
   bluez5.enable-sbc-xq = true
-  bluez5.enable-msbc = true
+  bluez5.enable-msbc = false
 }
 
 monitor.bluez.rules = [
