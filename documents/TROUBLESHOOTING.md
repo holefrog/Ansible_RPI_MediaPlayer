@@ -1462,6 +1462,43 @@ systemctl --user restart pipewire wireplumber
 
 </details>
 
+<details>
+<summary><strong>方法 4：配对后设备图标显示为“电话”而非“耳机”</strong></summary>
+
+**症状：**
+- 手机搜索时显示为耳机或音箱
+- 配对成功后，图标变成了“电话”（通话设备）
+- 手机认为该设备支持免提通话功能
+
+**原因：**
+从 `WirePlumber 0.5.x` 开始，系统废弃了旧的 `.lua` 配置，转用 SPA-JSON `.conf`，并且**默认开启了所有与通话相关的配置**（HFP/HSP 角色以及高质量语音 mSBC 编码）。这会让手机将树莓派识别为一个“免提电话”设备。
+
+**解决方案：**
+确保在 WirePlumber 的蓝牙配置文件中，显式屏蔽通话角色支持：
+
+```bash
+# 查看配置文件
+cat ~/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf
+
+# 确保包含以下关键配置：
+monitor.bluez.properties = {
+  # ...
+  # 显式将免提通话角色置空
+  bluez5.hfphsp-roles = [ ]
+  
+  # 关闭针对通话的高级编码 mSBC
+  bluez5.enable-msbc = false
+}
+```
+
+修改后重启相关服务并在手机上重新配对：
+```bash
+systemctl --user restart wireplumber pipewire
+sudo systemctl restart bluetooth
+```
+
+</details>
+
 **📖 详细蓝牙配对策略：** [`documents/BLUETOOTH_TIPS.md`](documents/BLUETOOTH_TIPS.md)
 
 ### 🔊 蓝牙音量控制说明

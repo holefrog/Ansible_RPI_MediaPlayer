@@ -5,14 +5,24 @@
   tasks:
     - name: Check System Services Status
       become: yes
-      ansible.builtin.command: "systemctl is-active bluetooth bluetooth-a2dp-autopair"
+      ansible.builtin.command: "systemctl is-active {{ item }}"
+      loop:
+        - bluetooth
+        - bluetooth-a2dp-autopair
       register: system_status
       ignore_errors: yes
       changed_when: false
 
     - name: Check User Services Status
       become: no
-      ansible.builtin.command: "systemctl --user is-active pipewire wireplumber squeezelite shairport-sync oled volume"
+      ansible.builtin.command: "systemctl --user is-active {{ item }}"
+      loop:
+        - pipewire
+        - wireplumber
+        - squeezelite
+        - shairport-sync
+        - oled
+        - volume
       environment:
         XDG_RUNTIME_DIR: "{{ mediaplayer_runtime_dir | default('/run/user/1000') }}"
       register: user_status
@@ -21,10 +31,12 @@
 
     - name: Report Services Status
       ansible.builtin.debug:
-        msg: 
-          - "===== SYSTEM SERVICES ====="
-          - "bluetooth, autopair:"
-          - "{{ system_status.stdout_lines }}"
-          - "===== USER SERVICES ====="
-          - "pipewire, wireplumber, squeezelite, airplay, oled, volume:"
-          - "{{ user_status.stdout_lines }}"
+        msg: |
+          ===== SYSTEM SERVICES =====
+          {% for res in system_status.results %}
+          {{ '%-25s' | format(res.item) }}: {{ res.stdout }}
+          {% endfor %}
+          ===== USER SERVICES =====
+          {% for res in user_status.results %}
+          {{ '%-25s' | format(res.item) }}: {{ res.stdout }}
+          {% endfor %}
