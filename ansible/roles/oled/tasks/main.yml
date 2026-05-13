@@ -85,7 +85,7 @@
 
 - name: Ensure user systemd directory exists
   ansible.builtin.file:
-    path: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user"
+    path: "{{ mediaplayer_home }}/.config/systemd/user"
     state: directory
     mode: '0755'
   become: no
@@ -93,7 +93,7 @@
 - name: Generate systemd user service for OLED
   ansible.builtin.template:
     src: oled.service.j2
-    dest: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user/oled.service"
+    dest: "{{ mediaplayer_home }}/.config/systemd/user/oled.service"
     mode: '0644'
   become: no
   notify: 

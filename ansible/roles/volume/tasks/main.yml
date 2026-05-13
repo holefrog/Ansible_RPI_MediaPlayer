@@ -25,7 +25,7 @@
 
 - name: Ensure user systemd directory exists
   ansible.builtin.file:
-    path: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user"
+    path: "{{ mediaplayer_home }}/.config/systemd/user"
     state: directory
     mode: '0755'
   become: no
@@ -33,7 +33,7 @@
 - name: Generate volume user service
   ansible.builtin.template:
     src: volume.service.j2
-    dest: "{{ ansible_facts['env']['HOME'] }}/.config/systemd/user/volume.service"
+    dest: "{{ mediaplayer_home }}/.config/systemd/user/volume.service"
     mode: '0644'
   become: no
   notify: 

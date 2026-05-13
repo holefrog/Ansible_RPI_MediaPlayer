@@ -1,7 +1,7 @@
 ---
 - name: Enable user Linger mode (Required for user systemd services)
   become: yes
-  ansible.builtin.command: "loginctl enable-linger {{ ansible_facts['user_id'] }}"
+  ansible.builtin.command: "loginctl enable-linger {{ mediaplayer_user }}"
   changed_when: false
 
 - name: Set system timezone
@@ -24,14 +24,14 @@
 
 - name: Add bash alias ll='ls -l'
   ansible.builtin.lineinfile:
-    path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
+    path: "{{ mediaplayer_home }}/.bashrc"
     line: "alias ll='ls -l'"
     state: present
   become: no
 
 - name: Add bash alias for checking all media services status
   ansible.builtin.lineinfile:
-    path: "{{ ansible_facts['env']['HOME'] }}/.bashrc"
+    path: "{{ mediaplayer_home }}/.bashrc"
     line: "alias check_status='systemctl --user status pipewire wireplumber squeezelite shairport-sync oled volume && systemctl status bluetooth bluetooth-a2dp-autopair'"
     state: present
     create: yes
