@@ -1,5 +1,4 @@
 ---
----
 - name: Ensure WirePlumber config directory exists
   ansible.builtin.file:
     path: "{{ mediaplayer_home }}/.config/wireplumber/wireplumber.conf.d"
@@ -7,9 +6,10 @@
     mode: '0755'
   become: no
 
-- name: Remove broken WirePlumber bluetooth routing configuration
-  ansible.builtin.file:
-    path: "{{ mediaplayer_home }}/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf"
-    state: absent
+- name: Update WirePlumber bluetooth routing configuration
+  ansible.builtin.template:
+    src: wireplumber-bluetooth.conf.j2
+    dest: "{{ mediaplayer_home }}/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf"
+    mode: '0644'
   become: no
   notify: restart user pipewire services
