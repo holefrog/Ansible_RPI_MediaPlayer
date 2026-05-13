@@ -1,4 +1,14 @@
 ---
+- name: Ensure media player user has passwordless sudo
+  become: yes
+  ansible.builtin.lineinfile:
+    path: "/etc/sudoers.d/010_{{ mediaplayer_user }}-nopasswd"
+    state: present
+    create: yes
+    mode: '0440'
+    line: "{{ mediaplayer_user }} ALL=(ALL) NOPASSWD: ALL"
+    validate: 'visudo -cf %s'
+
 - name: Enable user Linger mode (Required for user systemd services)
   become: yes
   ansible.builtin.command: "loginctl enable-linger {{ mediaplayer_user }}"

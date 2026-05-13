@@ -38,6 +38,13 @@ if [[ "$v" =~ ^[Yy]$ ]]; then
 fi
 echo ""
 
+BECOME_PASS=""
+read -rp "是否需要输入 sudo 密码 (用于 become)？[y/N]: " bp
+if [[ "$bp" =~ ^[Yy]$ ]]; then
+    BECOME_PASS="-K"
+fi
+echo ""
+
 # 检查 SSH 密钥
 KEY="rpi_keys/id_rpi"
 if [[ ! -f "$KEY" ]]; then
@@ -54,7 +61,7 @@ echo "--------------------------------------------------------"
 echo "🛠️  正在执行 ${MODE}..."
 echo "--------------------------------------------------------"
 
-ansible-playbook "$PB" $VERBOSE "$@"
+ansible-playbook "$PB" $VERBOSE $BECOME_PASS "$@"
 
 echo ""
 echo "🎉 ${MODE} 完成！"
