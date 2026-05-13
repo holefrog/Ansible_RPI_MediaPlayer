@@ -1,6 +1,6 @@
 ---
-# Use the physical hardware MAC address of the default network interface to prevent HA duplication
-player_mac: "{{ ansible_default_ipv4.macaddress }}"
+# Use wlan0 MAC if available, fallback to eth0, then to default route interface to prevent HA duplication
+player_mac: "{{ (ansible_wlan0 | default({})).macaddress | default((ansible_eth0 | default({})).macaddress) | default(ansible_default_ipv4.macaddress) }}"
 
 # Global LMS Server configuration
 lms_server_ip: "192.168.50.210"
