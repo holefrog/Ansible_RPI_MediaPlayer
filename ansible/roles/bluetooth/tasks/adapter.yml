@@ -1,0 +1,13 @@
+---
+- name: Flush handlers to restart PipeWire and BlueZ immediately
+  ansible.builtin.meta: flush_handlers
+
+- name: Force Bluetooth system alias (Override BlueZ cache)
+  become: yes
+  ansible.builtin.command: bluetoothctl system-alias "{{ BT_NAME }}"
+  changed_when: true
+
+- name: Ensure Bluetooth is discoverable
+  become: yes
+  ansible.builtin.command: bluetoothctl discoverable on
+  changed_when: false
