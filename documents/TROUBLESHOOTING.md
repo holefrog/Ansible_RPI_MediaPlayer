@@ -1484,7 +1484,7 @@ cat ~/.config/wireplumber/wireplumber.conf.d/51-bluetooth-fix.conf
 monitor.bluez.properties = {
   # ...
   # 显式将免提通话角色置空
-  bluez5.hfphsp-roles = [ ]
+  bluez5.hfphsp-roles = [ ] 
   
   # 关闭针对通话的高级编码 mSBC
   bluez5.enable-msbc = false

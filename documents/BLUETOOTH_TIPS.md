@@ -97,3 +97,49 @@ sudo find /var/lib/bluetooth -type d -name "[0-9A-F][0-9A-F]:*" -exec rm -rf {} 
 
 ### ③ 服务层（autopair.sh）
 负责运行时自动清理，确保所有连接都是最简单的首次配对流程。
+
+## 8. 深入 WirePlumber 0.5.x：无头模式 (Headless) 蓝牙音频陷阱
+
+在纯无头模式下自动化部署时（例如通过 Ansible），即便 BlueZ 配对成功，也常会遇到**苹果设备搜不到**、**安卓设备连接后无声（无媒体音频选项）**的致命问题。
+
+其根本原因在于 **WirePlumber 0.5.x 的安全策略限制** 以及 **SPA-JSON 配置合并规则**：
+
+### 陷阱 1：`systemd-logind` 座位检测拦截
+WirePlumber 默认集成了 `logind`。在没有物理显示器和真实用户登录的无头模式下，系统座位（Seat）状态为 `online` 而非 `active`。出于防窃听的安全考虑，WirePlumber 的 `seat-monitoring` 模块会**直接拒绝加载蓝牙音频监听器**，导致底层无法向 BlueZ 注册 `Audio Sink (A2DP)` 角色。没有音频角色，苹果设备会将其屏蔽，安卓设备则拒绝建立音频通道。
+
+**✅ 解决方案：** 必须在配置文件中彻底禁用 `seat-monitoring` 组件，并附带 `"with-logind" = false` 属性。
+
+### 陷阱 2：SPA-JSON 数组覆盖导致默认规则丢失
+WirePlumber 0.5.x 使用 SPA-JSON 格式。当你在配置中使用字典 `{}` 时，系统会进行**合并**；但如果你使用数组 `[]`（如定义 `monitor.bluez.rules = [...]`），它会**彻底覆盖并清空**系统出厂自带的所有蓝牙硬件初始化规则！这会导致蓝牙声卡无法被实例化。
+
+**✅ 解决方案：** 不要覆盖 `rules` 数组，仅通过 `properties` 字典去修改我们关心的属性。
+
+### 终极配置文件形态 (`51-bluetooth-fix.conf`)
+
+综合以上所有痛点（包括屏蔽电话免提图标、兼容安卓 SBC 编码等），最终确立的完美配置应如下：
+
+```json
+# Disable seat monitoring component in WirePlumber 0.5.x profiles
+wireplumber.profiles = {
+  main = {
+    monitor.bluez.seat-monitoring = disabled
+  }
+}
+
+# Properties for the bluez-monitor component
+monitor.bluez.properties = {
+  # 核心修复：禁用 logind 座位检测，强制在 headless 无头模式下加载蓝牙音频
+  "with-logind" = false
+
+  bluez5.enable-hw-volume = true
+  
+  # 蓝牙角色配置
+  bluez5.roles = [ "a2dp_sink", "a2dp_source" ]
+  bluez5.hfphsp-roles = [ ] # 禁用 HSP/HFP，防止被识别为带麦克风的电话
+  
+  # 支持的编解码器 (强制回退标准 SBC/AAC，兼容所有安卓设备)
+  bluez5.codecs = [ "sbc", "aac" ]
+  bluez5.enable-sbc-xq = false
+  bluez5.enable-msbc = false
+}
+```
