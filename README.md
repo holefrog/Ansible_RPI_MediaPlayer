@@ -1,8 +1,8 @@
 ![Logo](logo.png)
 
-# 🎵 RPI MediaPlayer
+# 🎵 RPI MediaPlayer (Ansible Edition)
 
-将 Raspberry Pi 打造为专业级多音源媒体播放器，支持 **Logitech Media Server (LMS)**、**AirPlay 2** 和 **蓝牙音频**，配备 **OLED 实时显示屏**。
+将 Raspberry Pi 打造为专业级多音源媒体播放器，支持 **Logitech Media Server (LMS)**、**AirPlay 2** 和 **蓝牙音频**，配备 **OLED 实时显示屏**。本项目已重构为基于 **Ansible** 的全自动化部署架构。
 
 ---
 
@@ -25,11 +25,11 @@
 - 🎚️ 音源优先级自动管理
 - 🎛️ 独立音量控制
 
-### 🚀 全自动部署
-- ⚡ 一键安装脚本
-- 🔄 智能两阶段部署
+### 🚀 Ansible 自动化部署
+- ⚡ 一键执行 Playbook
+- 🔄 声明式配置，自动处理依赖和顺序
 - 🔌 硬件驱动自动加载
-- ✅ 服务自动启动和验证
+- ✅ 幂等性（重复执行不破坏现有环境）
 
 ---
 
@@ -63,139 +63,50 @@
 
 ## 📁 项目结构
 
-```
+```text
 RPI-MediaPlayer/
-├── 📄 config.ini              # 主配置文件（SSH、音源、硬件参数）
-├── 🚀 setup.sh                # 本地部署脚本（入口）
-├── 🔧 stage_1.sh              # 阶段1：系统和硬件驱动
-├── 🔧 stage_2.sh              # 阶段2：服务安装
+├── ansible/
+│   ├── ansible.cfg              # Ansible 全局配置
+│   ├── site.yml                 # 主 Playbook 入口
+│   ├── status.yml               # 服务状态检查 Playbook
+│   ├── inventory/
+│   │   └── hosts.ini            # 目标主机清单与连接配置
+│   ├── group_vars/
+│   │   └── all.yml              # 全局变量配置（LMS IP、用户信息等）
+│   └── roles/                   # Ansible 角色模块
+│       ├── system/              # 系统基础与硬件配置 (WM8960, OLED I2C)
+│       ├── pipewire/            # PipeWire 音频服务器
+│       ├── volume/              # 硬件与软件音量控制
+│       ├── squeezelite/         # LMS 客户端
+│       ├── airplay/             # Shairport-Sync (AirPlay 2)
+│       ├── bluetooth/           # 蓝牙音频与自动配对
+│       └── oled/                # OLED 状态显示 Python 应用
 │
-├── 📚 lib/                    # 核心库
-│   ├── env.sh                 # 环境初始化和路径管理
-│   ├── utils.sh               # 工具函数（日志、配置、服务管理）
-│   ├── local_utils.sh         # 本地脚本工具库
-│   └── monitor.sh             # 远程服务监控脚本
+├── documents/                   # 详细文档
+│   ├── BLUETOOTH_TIPS.md        # 蓝牙配提示
+│   ├── HW_SSD1306.md            # OLED 接线和配置
+│   ├── HW_WM8960.md             # WM8960 接线和验证
+│   ├── RPI_HEADLESS_SETUP.md    # 无头安装教程
+│   ├── RPI_SSH_KEY_GEN.md       # SSH 密钥配置
+│   └── TROUBLESHOOTING.md       # 故障排查指南
 │
-├── 🧩 modules/                # 安装模块（按顺序执行）
-│   ├── 01-system.sh           # 系统配置（时区、locale、硬件驱动）
-│   ├── 02-pipewire.sh         # PipeWire 音频服务器
-│   ├── 03-volume.sh           # 音量控制
-│   ├── 04-squeezelite.sh      # LMS 播放器
-│   ├── 05-oled.sh             # OLED 显示屏
-│   ├── 06-airplay.sh          # AirPlay 接收器
-│   └── 07-bluetooth.sh        # 蓝牙音频
-│
-├── 📋 templates/              # 配置和脚本模板
-│   ├── configs/               # 服务配置文件
-│   │   ├── bluetooth-main.conf.template
-│   │   ├── oled.ini.template
-│   │   ├── shairport-sync.conf.template
-│   │   └── wireplumber-bluetooth.conf.template
-│   ├── scripts/               # 启动脚本
-│   │   ├── bluetooth-a2dp-autopair.sh.template
-│   │   ├── check_services.sh.template
-│   │   ├── oled_test.py.template
-│   │   ├── squeezelite.sh.template
-│   │   └── volume.sh.template
-│   └── services/              # Systemd 服务单元
-│       ├── bluetooth-a2dp-autopair.service.template
-│       ├── oled.service.template
-│       ├── shairport-sync.service.template
-│       ├── squeezelite.service.template
-│       └── volume.service.template
-│
-├── 🎨 resources/              # 应用资源
-│   └── oled/                  # OLED Python 应用
-│       ├── main.py            # 主循环
-│       ├── config.py          # 配置读取
-│       ├── display.py         # 显示控制
-│       ├── query.py           # 音源状态查询
-│       ├── screensaver.py     # 屏保管理
-│       ├── state_handlers.py  # 状态处理器
-│       └── msyh.ttf           # 中文字体
-│
-└── 📖 documents/              # 文档
-    ├── TROUBLESHOOTING.md     # 故障排查指南
-    ├── BLUETOOTH_TIPS.md      # 蓝牙配对策略
-    ├── HW_WM8960.md           # WM8960 接线和验证
-    ├── HW_SSD1306.md          # OLED 接线和配置
-    ├── RPI_HEADLESS_SETUP.md  # 无头安装教程
-    └── RPI_SSH_KEY_GEN.md     # SSH 密钥配置
+├── rpi_keys/                    # SSH 密钥存放目录（请勿提交私钥）
+├── apply.sh                     # 一键执行部署脚本
+├── remoteLogin.sh               # 快捷 SSH 登录脚本
+└── README.md                    # 本文档
 ```
 
 ---
 
-## 🔄 部署流程
-
-### 📋 部署架构
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                  本地电脑 (setup.sh)                     │
-│  1. ✅ 验证本地文件                                       │
-│  2. 📤 上传文件到树莓派                                   │
-│  3. 🚀 执行远程安装脚本                                   │
-│  4. 🔄 管理两次重启                                       │
-│  5. ✔️  验证服务状态                                      │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│            树莓派 - 阶段 1 (stage_1.sh)                  │
-│  • ⏰ 配置时区和 locale                                   │
-│  • ⚙️  修改 /boot/firmware/config.txt                    │
-│    - 启用 I2C (WM8960, OLED)                            │
-│    - 加载 WM8960 驱动 (dtoverlay=wm8960-soundcard)      │
-│    - 启用 GPIO 模拟 I2C (dtoverlay=i2c-gpio)            │
-│  • 🔄 自动重启（加载内核模块）                            │
-└─────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────┐
-│            树莓派 - 阶段 2 (stage_2.sh)                  │
-│  1. 🔍 验证硬件（WM8960 声卡、OLED I2C 设备）             │
-│  2. 🎵 安装 PipeWire 音频服务器                          │
-│  3. 🔊 配置音量控制（WM8960 硬件 + PipeWire 软件）        │
-│  4. 🎹 安装 Squeezelite（生成虚拟 MAC 地址）             │
-│  5. 🖥️  部署 OLED 显示应用（Python 虚拟环境）            │
-│  6. 📱 配置 AirPlay (Shairport-Sync + metadata 管道)    │
-│  7. 🔵 设置蓝牙自动配对（NoInputNoOutput 代理）          │
-│  • 🔄 最终重启（确保所有服务完全就绪）                    │
-└─────────────────────────────────────────────────────────┘
-```
-
-### 🔑 关键设计决策
-
-#### 🔄 两次重启的必要性
-- **第一次重启**：加载硬件驱动（dtoverlay 需要内核重新初始化）
-- **第二次重启**：确保所有用户服务在正确的运行时环境中启动
-
-#### 🎚️ 音量分层控制
-- **硬件层（WM8960）**：固定 95%，防止失真
-- **软件层（PipeWire）**：100% 默认，用户可调
-- **应用层（AirPlay/蓝牙）**：各自独立的音量控制
-
-#### 🎵 音源优先级判断
-- 检查 PipeWire `sink-inputs` 的 `corked` 状态
-- `corked: no` = 正在播放，`corked: yes` = 已暂停
-- **优先级**：AirPlay > 蓝牙 > Squeezelite
-
-#### 🔐 安全机制
-- SSH 密钥权限强制验证（600）
-- 蓝牙 PIN 文件权限保护（600）
-- AirPlay metadata 管道权限限制（664）
-
----
-
-## ⚙️ 安装步骤
+## 🚀 部署流程
 
 ### 前置要求
 
-- ✅ 已安装 Raspberry Pi OS (Trixie/Bookworm 64-bit)
-- ✅ 已配置 SSH 并可通过 `rpi.local` 访问
-- ✅ 已设置 SSH 密钥无密码登录（推荐）
+- ✅ 你的本地电脑已安装 **Ansible** (`sudo apt install ansible` 或 `brew install ansible`)
+- ✅ 已安装 Raspberry Pi OS 并接入网络
+- ✅ 已配置 SSH 并可通过 `rpi.local` 或 IP 访问
 
-### 🚀 快速开始
+### 快速开始
 
 在 **本地电脑**（非树莓派）执行以下命令：
 
@@ -204,212 +115,62 @@ RPI-MediaPlayer/
 git clone https://github.com/yourusername/RPI-MediaPlayer.git
 cd RPI-MediaPlayer
 
-# 2️⃣ 创建 SSH 密钥（如果没有）
+# 2️⃣ 创建 SSH 密钥（如果没有，也可以使用已有的密钥）
 mkdir -p rpi_keys
 ssh-keygen -t ed25519 -f ./rpi_keys/id_rpi -C "player@rpi"
 # 按 Enter 跳过密码（用于无密码登录）
 
-# 3️⃣ 将公钥复制到树莓派
+# 3️⃣ 将公钥复制到树莓派 (替换下面的IP和用户名为你的实际配置)
 ssh-copy-id -i ./rpi_keys/id_rpi.pub player@rpi.local
 
-# 4️⃣ 编辑配置文件
-nano config.ini
+# 4️⃣ 配置 Ansible 主机
+nano ansible/inventory/hosts.ini
 ```
 
-#### 关键配置项：
-
+**编辑 `hosts.ini` 示例：**
 ```ini
-[ssh]
-host = rpi.local          # 树莓派主机名或 IP
-user = player             # SSH 用户名
-key = ./rpi_keys/id_rpi   # 私钥路径
+[mediaplayers]
+rpi.local ansible_user=player ansible_ssh_private_key_file=../rpi_keys/id_rpi
 
-[squeezelite]
-name = RPI-Squeeze        # LMS 播放器名称
-server = 192.168.50.210   # LMS 服务器 IP
+[mediaplayers:vars]
+ansible_python_interpreter=/usr/bin/python3
+```
 
-[airplay]
-name = RPI-AirPlay        # AirPlay 名称
-port = 5000               # 监听端口
-
-[bluetooth]
-name = RPI-Bluetooth      # 蓝牙设备名称
-
-[oled]
-bus = 3                   # I2C 总线编号
-address = 0x3C            # I2C 地址
+**编辑全局变量（可选）：**
+```bash
+nano ansible/group_vars/all.yml
+# 可以在此处修改 lms_server_ip 等参数
 ```
 
 ```bash
-# 5️⃣ 运行自动化安装
-./setup.sh
+# 5️⃣ 运行 Ansible 自动化部署
+./apply.sh
+# (或者直接运行: ansible-playbook -i ansible/inventory/hosts.ini ansible/site.yml -K)
 ```
 
-### ⏱️ 预计时间
-
-| 阶段 | 时间 |
-|------|------|
-| 📤 上传文件 | ~10 秒 |
-| 🔧 阶段 1（系统配置） | ~2 分钟 + 重启（~1 分钟）|
-| 🔧 阶段 2（服务安装） | ~5 分钟 + 重启（~1 分钟）|
-| **⏱️ 总计** | **约 10-12 分钟** |
-
----
-
-## 🔧 配置说明
-
-### 核心配置（config.ini）
-
-<details>
-<summary>📖 点击展开完整配置示例</summary>
-
-```ini
-# ============================================
-# SSH 连接
-# ============================================
-[ssh]
-host = rpi.local          # 树莓派主机名或 IP
-user = player             # SSH 用户名
-port = 22                 # SSH 端口
-key = ./rpi_keys/id_rpi   # 私钥路径
-
-# ============================================
-# 系统配置
-# ============================================
-[system]
-timezone = America/Vancouver  # 时区
-auto_update = yes            # 是否自动更新系统
-
-# ============================================
-# Squeezelite (LMS 播放器)
-# ============================================
-[squeezelite]
-name = RPI-Squeeze           # 播放器名称（显示在 LMS 中）
-server = 192.168.50.210      # LMS 服务器 IP
-device = default             # ALSA 设备（通常用 default）
-args = -a 40:4:32:0 -b 500:5000  # 可选参数（缓冲、日志等）
-
-# ============================================
-# AirPlay
-# ============================================
-[airplay]
-name = RPI-AirPlay           # AirPlay 名称（显示在 iOS 中）
-port = 5000                  # 监听端口
-device = default             # ALSA 设备
-initial_volume = 60          # 初始音量（0-100）
-
-# ============================================
-# 蓝牙
-# ============================================
-[bluetooth]
-name = RPI-Bluetooth         # 蓝牙设备名称
-check_interval = 20          # 自动配对检查间隔（秒）
-
-# ============================================
-# WM8960 声卡
-# ============================================
-[wm8960]
-bus = 1                      # I2C 总线编号（通常是 1）
-
-# ============================================
-# OLED 显示屏
-# ============================================
-[oled]
-width = 128                  # 屏幕宽度
-height = 64                  # 屏幕高度
-bus = 3                      # I2C 总线编号（通常是 3）
-sda_pin = 4                  # GPIO 数据引脚
-scl_pin = 5                  # GPIO 时钟引脚
-address = 0x3C               # I2C 地址（0x3C 或 0x3D）
-
-# ============================================
-# 路径配置
-# ============================================
-[paths]
-# 远程安装目录名
-remote_install_dir = installer
-
-# 应用根目录名
-app_base_dir = rpi-mediaplayer
-
-# OLED 虚拟环境路径
-oled_venv_dir = .venv/oled
-
-# AirPlay metadata 管道路径
-metadata_pipe = /tmp/shairport-sync-metadata
-
-# ============================================
-# 超时配置（秒）
-# ============================================
-[timeouts]
-# APT 锁等待超时
-apt_lock = 60
-
-# PipeWire 就绪超时
-pipewire_ready = 30
-
-# SSH 连接超时
-ssh_connect = 10
-
-# 重启等待超时
-reboot_wait = 180
-
-# 重启轮询间隔
-reboot_poll_interval = 5
-
-# ============================================
-# 音频配置
-# ============================================
-[audio]
-# ALSA 硬件音量（0-100）
-default_hw_volume = 95
-
-# PipeWire Sink 默认音量（0-100）
-default_sink_volume = 100
-```
-
-</details>
-
-### 🔒 安全注意事项
-
-> **⚠️ 永远不要将私钥提交到 Git！**
-> 
-> - `.gitignore` 已配置忽略 `rpi_keys/` 目录
-> - 私钥仅保存在本地电脑
-> - 如需多台电脑部署，手动复制私钥文件
+> **注意：** 部署过程中如果涉及到硬件配置的更改，Ansible 可能会自动重启树莓派。由于重构为了 Ansible Playbook，整个过程是自动管理且幂等的。
 
 ---
 
 ## 📊 系统服务
 
-安装完成后，以下服务将自动运行：
-
-| 服务名称 | 类型 | 功能 | 启动命令 |
-|---------|------|------|---------|
-| `pipewire` | 👤 用户 | 音频服务器 | `systemctl --user status pipewire` |
-| `squeezelite` | 👤 用户 | LMS 播放器 | `systemctl --user status squeezelite` |
-| `shairport-sync` | 👤 用户 | AirPlay 接收 | `systemctl --user status shairport-sync` |
-| `oled` | 👤 用户 | OLED 显示 | `systemctl --user status oled` |
-| `volume` | 👤 用户 | 音量控制 | `systemctl --user status volume` |
-| `bluetooth` | 🔧 系统 | 蓝牙服务 | `systemctl status bluetooth` |
-| `bluetooth-a2dp-autopair` | 🔧 系统 | 蓝牙自动配对 | `systemctl status bluetooth-a2dp-autopair` |
-
-### 查看服务日志
+部署完成后，可以使用以下命令检查各服务的运行状态：
 
 ```bash
-# 用户服务
-journalctl --user -u squeezelite -f
-
-# 系统服务
-journalctl -u bluetooth-a2dp-autopair -f
+ansible-playbook -i ansible/inventory/hosts.ini ansible/status.yml
 ```
 
-### 检查所有服务状态
+### 主要后台服务：
 
-```bash
-# 使用内置的监控脚本
-./check_status.sh
-```
+- **系统级服务：**
+  - `bluetooth.service` - 蓝牙底层服务
+  - `bluetooth-a2dp-autopair.service` - 蓝牙自动配对代理
+- **用户级服务：**
+  - `pipewire.service` - 核心音频服务器
+  - `squeezelite.service` - LMS 播放器
+  - `shairport-sync.service` - AirPlay 接收服务
+  - `oled.service` - 显示屏驱动程序
+  - `volume.service` - 音量监听器
 
 ---
 
@@ -418,50 +179,28 @@ journalctl -u bluetooth-a2dp-autopair -f
 ### 🎵 播放音乐
 
 #### 方式 1：Logitech Media Server (LMS)
-1. 在 LMS 服务器上找到播放器 `RPI-Squeeze`
+1. 在 LMS 服务器上找到你的播放器
 2. 选择音乐并播放
 3. OLED 显示屏会自动显示曲目信息
 
 #### 方式 2：AirPlay
 1. 打开 iPhone/iPad 控制中心
-2. 点击 AirPlay 图标
-3. 选择 `RPI-AirPlay`
-4. 播放音乐，树莓派自动接收
+2. 点击 AirPlay 图标，选择播放器
+3. 播放音乐，树莓派自动接收
 
 #### 方式 3：蓝牙
 1. 打开手机蓝牙设置
-2. 搜索并连接 `RPI-Bluetooth`
-3. 无需 PIN 码，自动配对
-4. 播放音乐
+2. 搜索并连接 `RPI-Bluetooth`（或在 role 变量中自定义的名称）
+3. 无需 PIN 码，自动配对即可播放
 
 ### 🔊 音量控制
 
-**手动调节：**
-
-```bash
-volume.sh up      # 提高音量
-volume.sh down    # 降低音量
-volume.sh set 75  # 设置固定音量
-volume.sh mute    # 静音切换
-volume.sh status  # 查看当前状态
-```
-
-**自动音量：**
+音量控制已完全集成在系统中：
 - **AirPlay**：通过 iOS 设备侧边按键调节
 - **蓝牙**：通过播放设备音量键调节
 - **Squeezelite**：通过 LMS 界面调节
 
 ### 🖥️ OLED 显示说明
-
-**显示内容：**
-
-```
-┌────────────────────────┐
-│ SQ: 周杰伦              │  ← 顶部：音源 + 艺术家
-│ 晴天 ►►►               │  ← 中部：曲目（自动滚动）
-│ 🔊━━━━━━━━━━━━ 75%    │  ← 底部：音量条（2.5秒弹窗）
-└────────────────────────┘
-```
 
 **音源标识：**
 - `SQ:` - Squeezelite (LMS)
@@ -469,7 +208,7 @@ volume.sh status  # 查看当前状态
 - `BT:` - 蓝牙
 
 **屏保功能：**
-- **5秒无操作** → 亮度降低（8/255）
+- **5秒无操作** → 亮度降低
 - **15分钟无操作** → 屏幕关闭
 - **有新活动** → 自动唤醒
 
@@ -477,58 +216,24 @@ volume.sh status  # 查看当前状态
 
 ## 🛠️ 故障排查
 
-遇到问题？请查阅详细的故障排查指南：
+详细的故障排查请参阅 [TROUBLESHOOTING.md](documents/TROUBLESHOOTING.md) 
 
-### 📘 [TROUBLESHOOTING.md](documents/TROUBLESHOOTING.md)
+### 常用日志排查命令
+```bash
+# 查看用户服务日志 (Squeezelite / Shairport / OLED 等)
+journalctl --user -u squeezelite -f
+journalctl --user -u oled -f
 
-**常见问题快速索引：**
-
-| 问题类型 | 参考章节 |
-|---------|---------|
-| 🔌 SSH 连接失败 | [部署和连接问题](documents/TROUBLESHOOTING.md#1-部署和连接问题) |
-| 🔊 声卡未检测到 | [硬件检测问题](documents/TROUBLESHOOTING.md#2-硬件检测问题) |
-| 🖥️ OLED 无显示 | [OLED 显示问题](documents/TROUBLESHOOTING.md#6-oled-显示问题) |
-| 🎵 服务启动失败 | [音频服务问题](documents/TROUBLESHOOTING.md#3-音频服务问题) |
-| 🔵 蓝牙无法配对 | [蓝牙配对问题](documents/TROUBLESHOOTING.md#7-蓝牙配对问题) |
-| 🔇 音量过小/过大 | [音量控制问题](documents/TROUBLESHOOTING.md#5-音量控制问题) |
+# 查看系统级服务日志 (Bluetooth 等)
+journalctl -u bluetooth-a2dp-autopair -f
+```
 
 ---
 
-## 🤝 贡献
+## 🤝 贡献与许可
 
-欢迎提交 Issue 和 Pull Request！
-
-### 开发指南
-
-- 📏 代码风格遵循 ShellCheck 规范
-- 📦 新增模块放在 `modules/` 目录
-- 📝 模板文件使用 `{{VARIABLE}}` 占位符
-- ✅ 提交前测试完整安装流程
-
----
-
-## 📄 许可证
-
-MIT License - 自由使用和修改
-
----
-
-## 🙏 致谢
-
-- [Logitech Media Server](https://github.com/Logitech/slimserver) - 开源音乐服务器
-- [Squeezelite](https://github.com/ralph-irving/squeezelite) - 轻量级音频播放器
-- [Shairport-Sync](https://github.com/mikebrady/shairport-sync) - AirPlay 音频接收器
-- [PipeWire](https://pipewire.org/) - 现代音频服务器
-- [Luma.OLED](https://github.com/rm-hull/luma.oled) - Python OLED 驱动库
-
----
-
-## 📮 联系方式
-
-- **问题反馈**：[GitHub Issues](https://github.com/yourusername/RPI-MediaPlayer/issues)
-- **讨论交流**：[GitHub Discussions](https://github.com/yourusername/RPI-MediaPlayer/discussions)
-
----
+- **开发指南：** 在 `ansible/roles` 目录下开发新模块，确保角色的独立性和高内聚。
+- **许可证：** MIT License - 自由使用和修改。
 
 <div align="center">
 
