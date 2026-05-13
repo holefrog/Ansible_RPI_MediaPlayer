@@ -9,6 +9,7 @@
       - alsa-utils
       - pulseaudio-utils
       - libspa-0.2-bluetooth
+      - pipewire-audio
     state: present
     update_cache: yes
 
