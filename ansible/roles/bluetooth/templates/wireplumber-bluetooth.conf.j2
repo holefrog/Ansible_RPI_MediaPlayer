@@ -1,27 +1,32 @@
-# WirePlumber 蓝牙音频路由修复配置
+# WirePlumber 0.5.x+ Bluetooth configuration.
+# This is a SPA-JSON file, which is a relaxed version of JSON.
+# We use a more strict, quoted-and-comma-separated syntax for maximum compatibility.
+
+# Properties for the bluez-monitor component
 monitor.bluez.properties = {
   bluez5.enable-hw-volume = true
   
   # 蓝牙角色配置
-  bluez5.roles = [ a2dp_sink, a2dp_source ]
-  bluez5.hfphsp-roles = [ ]
+  bluez5.roles = [ "a2dp_sink", "a2dp_source" ]
+  bluez5.hfphsp-roles = [ ] # Disable HSP/HFP profiles to ensure A2DP is used
   
   # 支持的编解码器 (关闭 sbc_xq，部分安卓设备对该非标准格式兼容性极差，会导致无声)
-  bluez5.codecs = [ sbc aac ]
-  bluez5.enable-sbc-xq = false
-  bluez5.enable-msbc = false
+  bluez5.codecs = [ "sbc", "aac" ]
+  bluez5.sbc-xq.enabled = false
+  bluez5.msbc.enabled = false
 }
 
+# Rules for the bluez-monitor component
 monitor.bluez.rules = [
   {
     matches = [ { device.name = "~bluez_card.*" } ]
     actions = {
       update-props = {
-        bluez5.auto-connect = [ a2dp_sink, a2dp_source ]
+        bluez5.auto-connect = [ "a2dp_sink", "a2dp_source" ]
         priority.driver = 1000
         priority.session = 1000
         node.pause-on-idle = false
-        session.suspend-timeout-seconds = 0
+        session.suspend-timeout-seconds = 0 # 0 means never suspend
       }
     }
   }
