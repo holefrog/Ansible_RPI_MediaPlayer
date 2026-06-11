@@ -23,9 +23,9 @@
 
 **症状：**
 ```bash
-ssh: connect to host rpi.local port 22: Connection refused
+ssh: connect to host rpi-player.local port 22: Connection refused
 # 或
-ssh: Could not resolve hostname rpi.local
+ssh: Could not resolve hostname rpi-player.local
 ```
 
 #### 🔍 排查步骤
@@ -35,7 +35,7 @@ ssh: Could not resolve hostname rpi.local
 
 ```bash
 # 1. 检查树莓派是否在线
-ping rpi.local
+ping rpi-player.local
 
 # 2. 如果无法解析主机名，尝试使用 IP 地址
 ping 192.168.1.xxx
@@ -50,7 +50,7 @@ dns-sd -B _ssh._tcp
 **✅ 解决方案：**
 - 确保树莓派和电脑在**同一网络**
 - 如果使用 WiFi，检查路由器 DHCP 分配的 IP
-- 使用 `ssh player@<IP地址>` 替代 `rpi.local`
+- 使用 `ssh player@<IP地址>` 替代 `rpi-player.local`
 - 确认 Raspberry Pi Imager 配置的网络信息正确
 
 </details>
@@ -85,12 +85,12 @@ ls -l ./rpi_keys/id_rpi
 chmod 600 ./rpi_keys/id_rpi
 
 # 测试详细连接日志
-ssh -i ./rpi_keys/id_rpi -v player@rpi.local
+ssh -i ./rpi_keys/id_rpi -v player@rpi-player.local
 ```
 
 **✅ 解决方案：**
 - 确保私钥权限为 `600`（仅所有者可读写）
-- 重新运行 `ssh-copy-id -i ./rpi_keys/id_rpi.pub player@rpi.local`
+- 重新运行 `ssh-copy-id -i ./rpi_keys/id_rpi.pub player@rpi-player.local`
 - 检查 `~/.ssh/authorized_keys` 是否包含公钥
 
 </details>
@@ -105,11 +105,11 @@ WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!
 
 ```bash
 # 删除旧的主机密钥
-ssh-keygen -R rpi.local
+ssh-keygen -R rpi-player.local
 ssh-keygen -R 192.168.1.xxx  # 如果使用过 IP
 
 # 重新连接时接受新指纹
-ssh -i ./rpi_keys/id_rpi player@rpi.local
+ssh -i ./rpi_keys/id_rpi player@rpi-player.local
 ```
 
 **✅ 解决方案：**
@@ -140,10 +140,10 @@ cat config.ini
 # 确保没有语法错误（[section] 和 key=value）
 
 # 3️⃣ 测试 SCP 连接
-scp -i ./rpi_keys/id_rpi config.ini player@rpi.local:~/test_upload
+scp -i ./rpi_keys/id_rpi config.ini player@rpi-player.local:~/test_upload
 
 # 4️⃣ 检查远程磁盘空间
-ssh -i ./rpi_keys/id_rpi player@rpi.local "df -h"
+ssh -i ./rpi_keys/id_rpi player@rpi-player.local "df -h"
 # 确保至少有 2GB 可用空间
 
 # 5️⃣ 检查脚本执行权限
@@ -185,7 +185,7 @@ reboot_poll_interval = 5   # 每 5 秒检查一次
 
 ```bash
 # 从另一个终端连接（如果可能）
-ssh -i ./rpi_keys/id_rpi player@rpi.local
+ssh -i ./rpi_keys/id_rpi player@rpi-player.local
 
 # 查看启动日志
 journalctl -b -0 | tail -100
@@ -222,7 +222,7 @@ aplay -l
 
 ```bash
 # SSH 连接到树莓派
-ssh -i ./rpi_keys/id_rpi player@rpi.local
+ssh -i ./rpi_keys/id_rpi player@rpi-player.local
 
 # 检查配置
 cat /boot/firmware/config.txt | grep -E "i2s|audio|wm8960"
@@ -670,7 +670,7 @@ nc -zv 192.168.50.210 3483
 
 # 3. 从 LMS 服务器 ping 树莓派
 # (在 LMS 服务器上执行)
-ping rpi.local
+ping rpi-player.local
 ```
 
 </details>
@@ -1848,7 +1848,7 @@ cd RPI-MediaPlayer
    } > ~/diagnostic_report.txt
    
    # 下载报告到本地
-   scp -i ./rpi_keys/id_rpi player@rpi.local:~/diagnostic_report.txt ./
+   scp -i ./rpi_keys/id_rpi player@rpi-player.local:~/diagnostic_report.txt ./
    ```
 
 2. **🐛 提交 Issue：**

@@ -58,7 +58,7 @@ Set authorized_keys for 'player':
 使用生成的私钥登录：
 
 ```bash
-ssh -i ./rpi_keys/id_rpi player@rpi.local
+ssh -i ./rpi_keys/id_rpi player@rpi-player.local
 ```
 
 ---

@@ -104,7 +104,7 @@ RPI-MediaPlayer/
 
 - ✅ 你的本地电脑已安装 **Ansible** (`sudo apt install ansible` 或 `brew install ansible`)
 - ✅ 已安装 Raspberry Pi OS 并接入网络
-- ✅ 已配置 SSH 并可通过 `rpi.local` 或 IP 访问
+- ✅ 已配置 SSH 并可通过 `rpi-player.local` 或 IP 访问
 
 ### 快速开始
 
@@ -121,7 +121,7 @@ ssh-keygen -t ed25519 -f ./rpi_keys/id_rpi -C "player@rpi"
 # 按 Enter 跳过密码（用于无密码登录）
 
 # 3️⃣ 将公钥复制到树莓派 (替换下面的IP和用户名为你的实际配置)
-ssh-copy-id -i ./rpi_keys/id_rpi.pub player@rpi.local
+ssh-copy-id -i ./rpi_keys/id_rpi.pub player@rpi-player.local
 
 # 4️⃣ 配置 Ansible 主机
 nano ansible/inventory/hosts.ini
@@ -130,7 +130,7 @@ nano ansible/inventory/hosts.ini
 **编辑 `hosts.ini` 示例：**
 ```ini
 [mediaplayers]
-rpi.local ansible_user=player ansible_ssh_private_key_file=../rpi_keys/id_rpi
+rpi-player.local ansible_user=player ansible_ssh_private_key_file=../rpi_keys/id_rpi
 
 [mediaplayers:vars]
 ansible_python_interpreter=/usr/bin/python3

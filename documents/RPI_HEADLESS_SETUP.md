@@ -15,7 +15,7 @@
    Press **`Ctrl + Shift + X`** to access pre-configuration:
 
    ### General
-   - **Hostname**: `rpi.local`
+   - **Hostname**: `rpi-player.local`
    - **Username**: `player`
    - **Password**: `yourpassword`
    - **Configure wireless LAN** (enter SSID & password)
@@ -34,7 +34,7 @@
 
 2. Connect via SSH:
 ```bash
-ssh player@rpi.local
+ssh player@rpi-player.local
 ```
    > (Ensure your computer is on the same network. `.local` uses mDNS.)
 
