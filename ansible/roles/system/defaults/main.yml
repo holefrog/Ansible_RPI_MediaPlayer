@@ -1,6 +1,7 @@
 ---
 # defaults file for system
 timezone: "America/Vancouver"
+system_hostname: "rpi-mediaplayer"
 auto_update: "yes"
 
 # Boot config
