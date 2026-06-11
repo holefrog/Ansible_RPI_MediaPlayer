@@ -147,6 +147,9 @@ nano ansible/group_vars/all.yml
 ./apply.sh
 # (或者直接运行: ansible-playbook -i ansible/inventory/hosts.ini ansible/site.yml -K)
 ```
+在提示：是否需要输入 sudo 密码 (用于 become)？[y/N]: y
+输入**本机** sudo password
+
 
 > **注意：** 部署过程中如果涉及到硬件配置的更改，Ansible 可能会自动重启树莓派。由于重构为了 Ansible Playbook，整个过程是自动管理且幂等的。
 
